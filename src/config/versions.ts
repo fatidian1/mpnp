@@ -8,7 +8,7 @@ export interface CompatibilityTarget {
 
 export const TARGET_NPM: CompatibilityTarget = {
   name: 'npm',
-  targetVersion: packageJson.devDependencies.npm,
+  targetVersion: '12.2.1',
   supportedRange: '>=10.0.0 <=12.x',
   notes:
     'Tailored for latest npm 12.x CLI specification and behavior (including workspaces, remote tarball packaging, native patch, approve-scripts, and pkg commands).',
