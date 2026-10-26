@@ -1,5 +1,5 @@
 {
-  "name": "mpnp",
+  "name": "@fatidian1/mpnp",
   "version": "0.1.0",
   "description": "Transparent bridge translating npm commands and flags into high-performance pnpm equivalents",
   "keywords": [

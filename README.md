@@ -139,7 +139,7 @@ src/
 
 ### Drop-in Shims
 
-When installed globally (`pnpm add -g mpnp`), `mpnp` provides transparent binary shims via `package.json` `bin`:
+When installed globally (`pnpm add -g @fatidian1/mpnp`), `mpnp` provides transparent binary shims via `package.json` `bin`:
 
 - `npm` – drop-in replacement forwarding all commands and flags to `pnpm`
 - `npx` – drop-in replacement forwarding to `pnpm dlx` or `pnpm exec`
