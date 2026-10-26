@@ -173,7 +173,7 @@ importers:
         specifier: ^6.43.0
         version: 6.43.0
       npm:
-        specifier: ^12.2.1
+        specifier: 12.2.1
         version: 12.2.1
       oxfmt:
         specifier: ^0.74.0
