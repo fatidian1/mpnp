@@ -1,0 +1,82 @@
+{
+  "name": "mpnp",
+  "version": "0.1.0",
+  "description": "Transparent bridge translating npm commands and flags into high-performance pnpm equivalents",
+  "keywords": [
+    "bridge",
+    "cli",
+    "compatibility",
+    "converter",
+    "npm",
+    "package-manager",
+    "pnpm",
+    "translator"
+  ],
+  "homepage": "https://github.com/fatidian1/mpnp#readme",
+  "bugs": {
+    "url": "https://github.com/fatidian1/mpnp/issues"
+  },
+  "license": "MIT",
+  "author": "fatidian1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fatidian1/mpnp.git"
+  },
+  "bin": {
+    "npm": "./dist/npm.mjs",
+    "npx": "./dist/npx.mjs"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit",
+    "prepack": "tsdown",
+    "prepublishOnly": "vitest run && tsc --noEmit",
+    "format": "oxfmt",
+    "format:check": "oxfmt --check",
+    "lint": "oxlint",
+    "type:check": "tsc --noEmit",
+    "dep:check": "knip"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "knip": "^6.43.0",
+    "npm": "12.2.1",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "oxlint-config-universe": "^0.2.0",
+    "tsdown": "^0.23.2",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": "12.15.0"
+    }
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
