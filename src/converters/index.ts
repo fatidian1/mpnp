@@ -18,4 +18,6 @@ export { ExecConverter } from './exec.js';
 export { CacheConverter } from './cache.js';
 export { PatchConverter } from './patch.js';
 export { ApproveBuildsConverter } from './approve-builds.js';
+export { ViewConverter } from './view.js';
+export { SearchConverter } from './search.js';
 export { DefaultConverter } from './default.js';

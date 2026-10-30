@@ -13,7 +13,7 @@ Converters and CLI behaviors are tailored to the latest releases of `npm` and `p
 | Tool     | Target Version | Supported Range   | Architectural Notes                                                                                                   |
 | :------- | :------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------- |
 | **npm**  | `12.2.1`       | `>=10.0.0 <=12.x` | Standard npm CLI specification (workspaces, remote tarball packaging, native patch, approve-scripts, `pkg` commands). |
-| **pnpm** | `12.15.0`      | `>=10.0.0 <=12.x` | High-performance Rust-powered pnpm 12 engine with recursive workspace filters (`--filter`, `-r`), frozen lockfile.    |
+| **pnpm** | `12.16.1`      | `>=10.0.0 <=12.x` | High-performance Rust-powered pnpm 12 engine with recursive workspace filters (`--filter`, `-r`), frozen lockfile.    |
 
 Compatibility targets are defined in [src/config/versions.ts](src/config/versions.ts).
 
@@ -171,3 +171,24 @@ pnpm format        # Format codebase with oxfmt in ~5ms
 pnpm format:check  # Check formatting with oxfmt --check
 pnpm dep:check     # Analyze unused dependencies with knip
 ```
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please check out [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, testing, and PR guidelines.
+
+---
+
+## 💖 Funding & Sponsorship
+
+If you find `mpnp` useful, consider supporting its maintenance and development:
+
+- [GitHub Sponsors](https://github.com/sponsors/fatidian1)
+- [Buy Me a Coffee](https://buymeacoffee.com/fatidian1)
+
+---
+
+## 📄 License
+
+MIT © [fatidian1](LICENSE)

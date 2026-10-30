@@ -21,6 +21,8 @@ const FLAGS_WITH_ARGUMENT = new Set([
   'state-dir',
   'omit',
   'include',
+  'searchlimit',
+  'search-limit',
 ]);
 
 export function parseArgs(rawTokens: readonly string[], pm: PackageManager = PackageManager.NPM): Command {

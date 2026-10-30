@@ -75,6 +75,37 @@ export function translateCommonFlags(params: readonly CommandParam[]): CommandPa
       continue;
     }
 
+    // Save: -S / --save -> drop (pnpm add saves by default; pnpm has no bare --save/-S)
+    if (p.matchesName('save', 'S')) {
+      continue;
+    }
+
+    // Search limit: --searchlimit <n> -> --search-limit <n>
+    if (p.matchesName('searchlimit')) {
+      result.push(CommandParam.longFlag('search-limit', p.value));
+      continue;
+    }
+
+    // Description: --no-description / --description -> drop (unsupported in pnpm search)
+    if (p.matchesName('description', 'no-description')) {
+      continue;
+    }
+
+    // Update notifier: --no-update-notifier / --update-notifier -> drop (npm-specific)
+    if (p.matchesName('update-notifier', 'no-update-notifier')) {
+      continue;
+    }
+
+    // Fund: --no-fund / --fund -> drop (npm-specific)
+    if (p.matchesName('fund', 'no-fund')) {
+      continue;
+    }
+
+    // Audit: --no-audit / --audit -> drop (npm-specific flags on install/update/etc.)
+    if (p.matchesName('audit', 'no-audit')) {
+      continue;
+    }
+
     // Pass through as is
     result.push(p);
   }

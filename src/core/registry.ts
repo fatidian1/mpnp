@@ -22,6 +22,8 @@ import { ExecConverter } from '../converters/exec.js';
 import { CacheConverter } from '../converters/cache.js';
 import { PatchConverter } from '../converters/patch.js';
 import { ApproveBuildsConverter } from '../converters/approve-builds.js';
+import { ViewConverter } from '../converters/view.js';
+import { SearchConverter } from '../converters/search.js';
 import { DefaultConverter } from '../converters/default.js';
 
 export class ConverterRegistry {
@@ -82,7 +84,9 @@ export class ConverterRegistry {
       .register(new ExecConverter())
       .register(new CacheConverter())
       .register(new PatchConverter())
-      .register(new ApproveBuildsConverter());
+      .register(new ApproveBuildsConverter())
+      .register(new ViewConverter())
+      .register(new SearchConverter());
 
     return registry;
   }
