@@ -108,4 +108,22 @@ describe('InstallConverter', () => {
       expect(result2.command.toString()).toBe('pnpm install --prod');
     }
   });
+
+  it('translates npm --cache <dir> to pnpm --cache-dir', async () => {
+    const cmd = parseArgs(['install', '--cache', '/tmp/custom-cache']);
+    const result = await registry.convert(cmd);
+    expect(result.type).toBe('pnpm');
+    if (result.type === 'pnpm') {
+      expect(result.command.toString()).toBe('pnpm install --cache-dir=/tmp/custom-cache');
+    }
+  });
+
+  it('preserves --env-file with value', async () => {
+    const cmd = parseArgs(['install', '--env-file', '.env.local']);
+    const result = await registry.convert(cmd);
+    expect(result.type).toBe('pnpm');
+    if (result.type === 'pnpm') {
+      expect(result.command.toString()).toBe('pnpm install --env-file=.env.local');
+    }
+  });
 });

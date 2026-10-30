@@ -86,6 +86,12 @@ export function translateCommonFlags(params: readonly CommandParam[]): CommandPa
       continue;
     }
 
+    // Cache dir: --cache <dir> -> --cache-dir <dir> (supported since pnpm 12.16.1)
+    if (p.matchesName('cache')) {
+      result.push(CommandParam.longFlag('cache-dir', p.value));
+      continue;
+    }
+
     // Description: --no-description / --description -> drop (unsupported in pnpm search)
     if (p.matchesName('description', 'no-description')) {
       continue;

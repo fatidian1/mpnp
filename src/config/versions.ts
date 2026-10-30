@@ -7,8 +7,8 @@ export interface CompatibilityTarget {
 
 export const TARGET_NPM: CompatibilityTarget = {
   name: 'npm',
-  targetVersion: '12.2.1',
-  supportedRange: packageJson.engines.npm,
+  targetVersion: packageJson.devEngines.npm,
+  supportedRange: packageJson.devEngines.npm,
 };
 
 export const TARGET_PNPM: CompatibilityTarget = {

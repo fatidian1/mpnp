@@ -10,10 +10,10 @@ The project is built entirely in TypeScript (Node.js ESM) with strict typing, mo
 
 Converters and CLI behaviors are tailored to the latest releases of `npm` and `pnpm`:
 
-| Tool     | Target Version | Supported Range   | Architectural Notes                                                                                                   |
-| :------- | :------------- | :---------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| **npm**  | `12.2.1`       | `>=10.0.0 <=12.x` | Standard npm CLI specification (workspaces, remote tarball packaging, native patch, approve-scripts, `pkg` commands). |
-| **pnpm** | `12.16.1`      | `>=10.0.0 <=12.x` | High-performance Rust-powered pnpm 12 engine with recursive workspace filters (`--filter`, `-r`), frozen lockfile.    |
+| Tool     | Target Version | Supported Range | Architectural Notes                                                                                                   |
+| :------- | :------------- | :-------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| **npm**  | `12.2.1`       | `12.2.1`        | Standard npm CLI specification (workspaces, remote tarball packaging, native patch, approve-scripts, `pkg` commands). |
+| **pnpm** | `12.16.1`      | `^12.16.1`      | High-performance Rust-powered pnpm 12 engine with recursive workspace filters (`--filter`, `-r`), frozen lockfile.    |
 
 Compatibility targets are defined in [src/config/versions.ts](src/config/versions.ts).
 
@@ -45,7 +45,9 @@ The primary focus of this tool is dependency management, scripts execution, and 
 | `npm patch`           | `patch-commit`                                        | `pnpm patch` / `pnpm patch-commit`        | **Full (100%)** | Native patching workflow: `npm patch <pkg>` / `npm patch add <pkg>` -> `pnpm patch <pkg>`, `npm patch commit <dir>` / `npm patch-commit <dir>` -> `pnpm patch-commit <dir>`.                                                                                                                        |
 | `npm approve-scripts` | `deny-scripts`, `approve-builds`                      | `pnpm approve-builds`                     | **Full (100%)** | Script permission management introduced in npm 12: `approve-scripts` -> `pnpm approve-builds`, `deny-scripts <pkg>` -> `pnpm approve-builds !<pkg>`.                                                                                                                                                |
 | `npm cache`           | _(none)_                                              | `pnpm store`                              | **High (90%)**  | `npm cache clean` -> `pnpm store prune`, `npm cache ls` -> `pnpm store status`.                                                                                                                                                                                                                     |
-| _Other commands_      | _view, version, publish, ..._                         | `pnpm <command>`                          | **Passthrough** | Non-dependency commands pass through to `pnpm` with common flags translated.                                                                                                                                                                                                                        |
+| `npm view`            | `info`, `show`, `v`                                   | `pnpm view`                               | **Full (100%)** | Forwards package and field selectors (`version`, `versions`, etc.), supports `--json`, silently strips npm-specific flags (`--no-update-notifier`).                                                                                                                                                 |
+| `npm search`          | `s`, `se`, `find`                                     | `pnpm search`                             | **Full (100%)** | Full registry search with `--json`, translates `--searchlimit` to `--search-limit`, strips `--no-description`.                                                                                                                                                                                      |
+| _Other commands_      | _version, publish, ..._                               | `pnpm <command>`                          | **Passthrough** | Non-dependency commands pass through to `pnpm` with common flags translated.                                                                                                                                                                                                                        |
 
 ---
 
@@ -58,6 +60,7 @@ The primary focus of this tool is dependency management, scripts execution, and 
 | `-O`, `--save-optional`           | `-O`, `--save-optional`         | Save package to `optionalDependencies`                               |
 | `--save-peer`                     | `--save-peer`                   | Save package to `peerDependencies`                                   |
 | `-E`, `--save-exact`              | `-E`                            | Save exact version without `^` or `~` prefixes                       |
+| `-S`, `--save`                    | _(dropped)_                     | Dropped on package additions (pnpm adds to dependencies by default)  |
 | `-w <name>`, `--workspace=<name>` | `--filter <name>`               | Select specific workspace package in monorepo                        |
 | `-ws`, `--workspaces`             | `-r`, `--recursive`             | Execute command recursively across all workspace packages            |
 | `--package-lock-only`             | `--lockfile-only`               | Updates only lockfile without downloading packages to `node_modules` |
@@ -65,6 +68,11 @@ The primary focus of this tool is dependency management, scripts execution, and 
 | `--production`, `--omit=dev`      | `--prod`                        | Exclude development dependencies                                     |
 | `--omit=optional`                 | `--no-optional`                 | Exclude optional dependencies                                        |
 | `--prefix <dir>`                  | `-C <dir>`                      | Set execution working directory                                      |
+| `--cache <dir>`                   | `--cache-dir <dir>`             | Set package cache directory (supported in pnpm 12.16.1+)             |
+| `--searchlimit <n>`               | `--search-limit <n>`            | Maximum number of packages to return in `npm search`                 |
+| `--no-update-notifier`            | _(dropped)_                     | Stripped to avoid unexpected argument errors in pnpm clap parser     |
+| `--no-fund`, `--fund`             | _(dropped)_                     | Stripped (npm funding notices are ignored by pnpm)                   |
+| `--no-audit`, `--audit`           | _(dropped)_                     | Stripped on install/update (pnpm audit is a standalone command)      |
 | `--all`, `-a` (in `ls`)           | `--depth=Infinity`              | Show full dependency tree without depth limits                       |
 | `--pack-destination <dir>`        | `--pack-destination <dir>`      | Directory where the `.tgz` archive is saved                          |
 
@@ -122,6 +130,8 @@ src/
 │   ├── cache.ts
 │   ├── patch.ts
 │   ├── approve-builds.ts
+│   ├── view.ts
+│   ├── search.ts
 │   └── default.ts
 ├── utils/
 │   └── tarball.ts  # Registry metadata resolver & tarball downloader

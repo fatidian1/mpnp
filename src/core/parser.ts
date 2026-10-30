@@ -23,6 +23,9 @@ const FLAGS_WITH_ARGUMENT = new Set([
   'include',
   'searchlimit',
   'search-limit',
+  'env-file',
+  'cache',
+  'cache-dir',
 ]);
 
 export function parseArgs(rawTokens: readonly string[], pm: PackageManager = PackageManager.NPM): Command {
