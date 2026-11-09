@@ -117,6 +117,15 @@ describe('Init, Pkg, Link, Run, Cache Converters', () => {
       }
     });
 
+    it('translates npm cache add to pnpm store add', async () => {
+      const cmd = parseArgs(['cache', 'add', 'lodash-4.17.21.tgz']);
+      const result = await registry.convert(cmd);
+      expect(result.type).toBe('pnpm');
+      if (result.type === 'pnpm') {
+        expect(result.command.toString()).toBe('pnpm store add lodash-4.17.21.tgz');
+      }
+    });
+
     it('translates npm cache ls to pnpm store status', async () => {
       const cmd = parseArgs(['cache', 'ls']);
       const result = await registry.convert(cmd);

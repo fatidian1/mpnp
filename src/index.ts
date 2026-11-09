@@ -3,6 +3,7 @@ export * from './core/param.js';
 export * from './core/command.js';
 export * from './core/parser.js';
 export * from './core/converter.js';
+export * from './core/builder.js';
 export * from './core/flags.js';
 export * from './core/registry.js';
 export * from './core/executor.js';

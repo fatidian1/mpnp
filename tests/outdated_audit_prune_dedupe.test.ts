@@ -50,6 +50,15 @@ describe('Outdated, Audit, Prune, Dedupe, List', () => {
     }
   });
 
+  it('translates npm dedupe --dry-run to pnpm dedupe --check', async () => {
+    const cmd = parseArgs(['dedupe', '--dry-run']);
+    const result = await registry.convert(cmd);
+    expect(result.type).toBe('pnpm');
+    if (result.type === 'pnpm') {
+      expect(result.command.toString()).toBe('pnpm dedupe --check');
+    }
+  });
+
   it('translates npm find-dupes alias to pnpm dedupe', async () => {
     const cmd = parseArgs(['find-dupes']);
     const result = await registry.convert(cmd);

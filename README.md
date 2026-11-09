@@ -12,8 +12,8 @@ Converters and CLI behaviors are tailored to the latest releases of `npm` and `p
 
 | Tool     | Target Version | Supported Range | Architectural Notes                                                                                                   |
 | :------- | :------------- | :-------------- | :-------------------------------------------------------------------------------------------------------------------- |
-| **npm**  | `12.2.1`       | `12.2.1`        | Standard npm CLI specification (workspaces, remote tarball packaging, native patch, approve-scripts, `pkg` commands). |
-| **pnpm** | `12.16.1`      | `^12.16.1`      | High-performance Rust-powered pnpm 12 engine with recursive workspace filters (`--filter`, `-r`), frozen lockfile.    |
+| **npm**  | `12.2.2`       | `12.2.2`        | Standard npm CLI specification (workspaces, remote tarball packaging, native patch, approve-scripts, `pkg` commands). |
+| **pnpm** | `12.18.0`      | `^12.18.0`      | High-performance Rust-powered pnpm 12 engine with recursive workspace filters (`--filter`, `-r`), frozen lockfile.    |
 
 Compatibility targets are defined in [src/config/versions.ts](src/config/versions.ts).
 
@@ -32,7 +32,7 @@ The primary focus of this tool is dependency management, scripts execution, and 
 | `npm outdated`        | _(none)_                                              | `pnpm outdated`                           | **Full (100%)** | Forwards inspection parameters (`--long`, `-g`, `--json`).                                                                                                                                                                                                                                          |
 | `npm audit`           | _(none)_                                              | `pnpm audit` / `pnpm audit --fix`         | **Full (100%)** | Automatically maps `npm audit fix` to `pnpm audit --fix`.                                                                                                                                                                                                                                           |
 | `npm prune`           | _(none)_                                              | `pnpm prune`                              | **Full (100%)** | Supports `--production` / `--omit=dev` -> `--prod`.                                                                                                                                                                                                                                                 |
-| `npm dedupe`          | `find-dupes`, `ddp`                                   | `pnpm dedupe`                             | **Full (100%)** | Optimizes dependency graph and deduplicates packages in lockfile.                                                                                                                                                                                                                                   |
+| `npm dedupe`          | `find-dupes`, `ddp`                                   | `pnpm dedupe`                             | **Full (100%)** | Optimizes dependency graph and deduplicates packages in lockfile (`--dry-run` -> `--check`).                                                                                                                                                                                                        |
 | `npm list`            | `ls`, `ll`, `la`                                      | `pnpm list` / `pnpm list --long`          | **Full (100%)** | `npm ls --all` -> `pnpm list --depth Infinity`. `ll`/`la` enable `--long` format.                                                                                                                                                                                                                   |
 | `npm explain`         | `why`                                                 | `pnpm why`                                | **Full (100%)** | Inspects why a specific package exists in the dependency tree.                                                                                                                                                                                                                                      |
 | `npm pack`            | _(none)_                                              | **Custom Registry Fetcher** / `pnpm pack` | **Full (100%)** | **Critical edge-case:** `pnpm pack lodash` fails because pnpm only packs local directories. `mpnp` detects remote package specifiers, fetches package metadata from npm registry, and downloads `${pkg}-${version}.tgz` to cwd or `--pack-destination`. Local targets are forwarded to `pnpm pack`. |
@@ -44,7 +44,7 @@ The primary focus of this tool is dependency management, scripts execution, and 
 | `npm exec` / `npx`    | _(none)_                                              | `pnpm exec` / `pnpm dlx`                  | **Full (100%)** | Executes local package binaries or runs one-off packages via `pnpm dlx`.                                                                                                                                                                                                                            |
 | `npm patch`           | `patch-commit`                                        | `pnpm patch` / `pnpm patch-commit`        | **Full (100%)** | Native patching workflow: `npm patch <pkg>` / `npm patch add <pkg>` -> `pnpm patch <pkg>`, `npm patch commit <dir>` / `npm patch-commit <dir>` -> `pnpm patch-commit <dir>`.                                                                                                                        |
 | `npm approve-scripts` | `deny-scripts`, `approve-builds`                      | `pnpm approve-builds`                     | **Full (100%)** | Script permission management introduced in npm 12: `approve-scripts` -> `pnpm approve-builds`, `deny-scripts <pkg>` -> `pnpm approve-builds !<pkg>`.                                                                                                                                                |
-| `npm cache`           | _(none)_                                              | `pnpm store`                              | **High (90%)**  | `npm cache clean` -> `pnpm store prune`, `npm cache ls` -> `pnpm store status`.                                                                                                                                                                                                                     |
+| `npm cache`           | _(none)_                                              | `pnpm store`                              | **Full (100%)** | `npm cache clean` -> `pnpm store prune`, `npm cache add` -> `pnpm store add` (pnpm 12.18.0+ offline store prep), `npm cache ls` -> `pnpm store status`.                                                                                                                                             |
 | `npm view`            | `info`, `show`, `v`                                   | `pnpm view`                               | **Full (100%)** | Forwards package and field selectors (`version`, `versions`, etc.), supports `--json`, silently strips npm-specific flags (`--no-update-notifier`).                                                                                                                                                 |
 | `npm search`          | `s`, `se`, `find`                                     | `pnpm search`                             | **Full (100%)** | Full registry search with `--json`, translates `--searchlimit` to `--search-limit`, strips `--no-description`.                                                                                                                                                                                      |
 | _Other commands_      | _version, publish, ..._                               | `pnpm <command>`                          | **Passthrough** | Non-dependency commands pass through to `pnpm` with common flags translated.                                                                                                                                                                                                                        |
@@ -107,32 +107,17 @@ src/
 │   ├── param.ts    # CommandParam abstraction (flags, values, positionals)
 │   ├── command.ts  # Command abstraction (immutable queries, mutations, serialization)
 │   ├── parser.ts   # CLI argument tokenizer (handles =, space-separated values, and --)
-│   ├── flags.ts    # Shared flag translation rules (npm -> pnpm)
+│   ├── flags.ts    # Shared flag translation forwarder
 │   ├── converter.ts# CommandConverter interface
-│   ├── registry.ts # Converter registry with fallback support
+│   ├── registry.ts # Central registry (commands, flag converters, drop rules, event handlers)
 │   └── executor.ts # Process executor (stdio: inherit, post-actions)
-├── converters/     # Modular converters (isolated per command family)
-│   ├── install.ts
-│   ├── ci.ts
-│   ├── uninstall.ts
-│   ├── update.ts
+├── converters/     # Domain handlers for complex command semantics
+│   ├── install.ts  # add vs install decision, lockfile-only enforcement
 │   ├── pack.ts     # Remote registry tarball & local package packing
 │   ├── init.ts     # Initializer starters & scoped name post-actions
-│   ├── audit.ts
-│   ├── dedupe.ts
-│   ├── list.ts
-│   ├── why.ts
-│   ├── pkg.ts
-│   ├── link.ts
-│   ├── root.ts
-│   ├── run.ts
-│   ├── exec.ts
-│   ├── cache.ts
-│   ├── patch.ts
-│   ├── approve-builds.ts
-│   ├── view.ts
-│   ├── search.ts
-│   └── default.ts
+│   ├── cache.ts    # Cache clean (prune), add (offline store), and status
+│   ├── patch.ts    # Patch commit & add subcommands
+│   └── approve-builds.ts # Script permission management & deny patterns
 ├── utils/
 │   └── tarball.ts  # Registry metadata resolver & tarball downloader
 ├── config/
