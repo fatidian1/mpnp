@@ -1,7 +1,10 @@
-import { defineConfig } from 'tsdown';
-
+import { defineConfig, type DepsConfig } from 'tsdown';
+const deps: DepsConfig = {
+  neverBundle: ['@pnpm/napi'],
+};
 export default defineConfig([
   {
+    deps,
     entry: {
       index: 'src/index.ts',
     },
@@ -12,6 +15,7 @@ export default defineConfig([
     sourcemap: true,
   },
   {
+    deps,
     entry: {
       npm: 'src/cli/npm.ts',
     },
@@ -22,6 +26,7 @@ export default defineConfig([
     banner: '#!/usr/bin/env node\n',
   },
   {
+    deps,
     entry: {
       npx: 'src/cli/npx.ts',
     },

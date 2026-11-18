@@ -6,12 +6,12 @@ describe('Ci, Uninstall, Update Converters', () => {
   const registry = ConverterRegistry.createDefault();
 
   describe('npm ci', () => {
-    it('translates npm ci to pnpm install --frozen-lockfile', async () => {
+    it('translates npm ci to pnpm ci', async () => {
       const cmd = parseArgs(['ci']);
       const result = await registry.convert(cmd);
       expect(result.type).toBe('pnpm');
       if (result.type === 'pnpm') {
-        expect(result.command.toString()).toBe('pnpm install --frozen-lockfile');
+        expect(result.command.toString()).toBe('pnpm ci');
       }
     });
 
@@ -20,7 +20,7 @@ describe('Ci, Uninstall, Update Converters', () => {
       const result = await registry.convert(cmd);
       expect(result.type).toBe('pnpm');
       if (result.type === 'pnpm') {
-        expect(result.command.toString()).toBe('pnpm install --prod --filter=api --frozen-lockfile');
+        expect(result.command.toString()).toBe('pnpm ci --prod --filter=api');
       }
     });
   });

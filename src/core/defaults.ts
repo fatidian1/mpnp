@@ -7,6 +7,14 @@ import { handleInit } from '../converters/init.js';
 import { handlePack } from '../converters/pack.js';
 import { handlePatch } from '../converters/patch.js';
 import { handleApproveBuilds } from '../converters/approve-builds.js';
+import { handleDiff } from '../converters/diff.js';
+import { handleEdit } from '../converters/edit.js';
+import { handleExec } from '../converters/exec.js';
+import { handleExplore } from '../converters/explore.js';
+import { handleInstallCiTest, handleInstallTest } from '../converters/composite.js';
+import { handleUnsupported } from '../converters/unsupported.js';
+import { handleVersion } from '../converters/version.js';
+import { handleQuery } from '../converters/query.js';
 
 export function configureDefaultRegistry(registry: ConverterRegistry): ConverterRegistry {
   // === GLOBAL FLAGS ===
@@ -39,25 +47,31 @@ export function configureDefaultRegistry(registry: ConverterRegistry): Converter
     );
 
   // === 1:1 PASSTHROUGH & ALIAS COMMANDS ===
-  registry.passthrough('outdated', 'prune', 'pkg', 'exec');
-  registry.command(['update', 'up', 'upgrade'], 'update');
+  registry.passthrough('outdated', 'prune', 'pkg');
+  registry.command(['update', 'up', 'upgrade', 'u', 'udpate'], 'update');
   registry.command(['why', 'explain'], 'why');
   registry.command(['view', 'info', 'show', 'v'], 'view');
   registry.command(['search', 's', 'se', 'find'], 'search');
+  registry.command(['owner', 'author'], 'owner');
+  registry.command(['docs', 'home'], 'docs');
+  registry.command(['bugs', 'issues'], 'bugs');
+  registry.command(['rebuild', 'rb'], 'rebuild');
+  registry.command(['config', 'c'], 'config');
+  registry.command(['dist-tag', 'dist-tags'], 'dist-tag');
+  registry.command(['help', 'hlep'], 'help');
 
-  // === COMMAND-SCOPED FLAGS ===
+  // === COMMAND-SCOPED FLAGS & HANDLERS ===
   registry.command(['dedupe', 'find-dupes', 'ddp'], 'dedupe').flag('dry-run', () => '--check');
 
-  registry.command(['ci', 'clean-install', 'ic'], 'install').handle((cmd, _ctx, translate) => {
-    const params = translate(cmd);
-    if (!params.some((p) => p.matchesName('frozen-lockfile'))) {
-      params.push(CommandParam.longFlag('frozen-lockfile'));
-    }
-    return {
-      type: 'pnpm',
-      command: cmd.withPM(PackageManager.PNPM).withName('install').withParams(params),
-    };
-  });
+  registry
+    .command(['ci', 'clean-install', 'ic', 'install-clean', 'isntall-clean'], 'ci')
+    .handle((cmd, _ctx, translate) => {
+      const params = translate(cmd);
+      return {
+        type: 'pnpm',
+        command: cmd.withPM(PackageManager.PNPM).withName('ci').withParams(params),
+      };
+    });
 
   registry
     .command(['list', 'ls', 'll', 'la'], 'list')
@@ -74,7 +88,7 @@ export function configureDefaultRegistry(registry: ConverterRegistry): Converter
       };
     });
 
-  registry.command(['link'], 'link').handle((cmd, _ctx, translate) => {
+  registry.command(['link', 'ln'], 'link').handle((cmd, _ctx, translate) => {
     const positionals = cmd.getPositionals();
     const params = translate(cmd);
     if (positionals.length === 0 && !cmd.hasFlag('global', 'g')) {
@@ -100,19 +114,19 @@ export function configureDefaultRegistry(registry: ConverterRegistry): Converter
     };
   });
 
+  // Fixed prefix bug: prefix exists in pnpm and points to project root!
   registry.command(['root', 'prefix', 'bin']).handle((cmd, _ctx, translate) => {
-    const targetName = cmd.name === 'prefix' ? 'root' : cmd.name;
     return {
       type: 'pnpm',
-      command: cmd.withPM(PackageManager.PNPM).withName(targetName).withParams(translate(cmd)),
+      command: cmd.withPM(PackageManager.PNPM).withName(cmd.name).withParams(translate(cmd)),
     };
   });
 
   registry
-    .command(['run', 'run-script', 'test', 't', 'tst', 'start', 'stop', 'restart'])
+    .command(['run', 'run-script', 'rum', 'urn', 'test', 't', 'tst', 'start', 'stop', 'restart'])
     .handle((cmd, _ctx, translate) => {
       let targetName = cmd.name;
-      if (targetName === 'run-script') {
+      if (targetName === 'run-script' || targetName === 'rum' || targetName === 'urn') {
         targetName = 'run';
       } else if (targetName === 't' || targetName === 'tst') {
         targetName = 'test';
@@ -137,16 +151,48 @@ export function configureDefaultRegistry(registry: ConverterRegistry): Converter
     };
   });
 
+  // SBOM converter ensuring required format flag
+  registry.command(['sbom'], 'sbom').handle((cmd, _ctx, translate) => {
+    let params = translate(cmd);
+    const sbomTypeFlag = cmd.getFlagValue('sbom-type');
+    const hasFormat = params.some((p) => p.matchesName('sbom-format'));
+
+    if (!hasFormat) {
+      const format = sbomTypeFlag === 'cyclonedx' ? 'cyclonedx' : 'spdx';
+      params = params.filter((p) => !p.matchesName('sbom-type'));
+      params.push(CommandParam.longFlag('sbom-format', format));
+    }
+    return {
+      type: 'pnpm',
+      command: cmd.withPM(PackageManager.PNPM).withName('sbom').withParams(params),
+    };
+  });
+
   // === COMPLEX DOMAIN COMMANDS ===
   registry
-    .command(['install', 'i', 'add', 'isntall', 'in', 'ins', 'inst', 'insta', 'instal', 'isnt', 'isnta'])
+    .command(['install', 'i', 'add', 'isntall', 'isntal', 'in', 'ins', 'inst', 'insta', 'instal', 'isnt', 'isnta'])
     .handle(handleInstall);
 
   registry.command(['cache']).handle(handleCache);
   registry.command(['init', 'create', 'innit']).handle(handleInit);
   registry.command(['pack']).handle(handlePack);
   registry.command(['patch', 'patch-commit']).handle(handlePatch);
-  registry.command(['approve-scripts', 'deny-scripts', 'approve-builds']).handle(handleApproveBuilds);
+  registry
+    .command(['approve-scripts', 'deny-scripts', 'approve-builds', 'install-scripts'])
+    .handle(handleApproveBuilds);
+
+  // === NEW SPECS & EXTENDED NPM COMMANDS ===
+  registry.command(['diff']).handle(handleDiff);
+  registry.command(['edit']).handle(handleEdit);
+  registry.command(['exec', 'x']).handle(handleExec);
+  registry.command(['explore']).handle(handleExplore);
+  registry.command(['install-ci-test', 'cit', 'clean-install-test', 'sit']).handle(handleInstallCiTest);
+  registry.command(['install-test', 'it']).handle(handleInstallTest);
+  registry.command(['version', 'verison']).handle(handleVersion);
+  registry.command(['query']).handle(handleQuery);
+
+  // === EXPLICIT FAST-FAIL UNSUPPORTED COMMANDS ===
+  registry.command(['trust', 'org', 'ogr', 'help-search']).handle(handleUnsupported);
 
   return registry;
 }

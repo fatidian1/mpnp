@@ -26,6 +26,14 @@ const FLAGS_WITH_ARGUMENT = new Set([
   'env-file',
   'cache',
   'cache-dir',
+  'package',
+  'p',
+  'sbom-type',
+  'sbom-format',
+  'tag',
+  'message',
+  'm',
+  'diff-unified',
 ]);
 
 export function parseArgs(rawTokens: readonly string[], pm: PackageManager = PackageManager.NPM): Command {

@@ -1,6 +1,6 @@
 {
   "name": "@fatidian1/mpnp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Transparent bridge translating npm commands and flags into high-performance pnpm equivalents",
   "keywords": [
     "bridge",
@@ -66,23 +66,24 @@
     "type:check": "tsc --noEmit",
     "dep:check": "knip"
   },
+  "dependencies": {
+    "@pnpm/napi": "12.21.0"
+  },
   "devDependencies": {
     "@types/node": "^26.6.6",
-    "knip": "^6.44.2",
-    "oxfmt": "^0.77.0",
-    "oxlint": "^1.92.0",
+    "knip": "^6.45.1",
+    "npm": "12.2.2",
+    "oxfmt": "^0.79.0",
+    "oxlint": "^1.94.0",
     "oxlint-config-universe": "^0.2.0",
     "tsdown": "^0.23.7",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vitest": "^5.1.0"
   },
-  "devEngines": {
-    "npm": "12.2.2"
-  },
   "engines": {
     "node": ">=20.0.0",
-    "pnpm": "^12.18.0"
+    "pnpm": "^12.21.0"
   },
-  "packageManager": "pnpm@12.18.0"
+  "packageManager": "pnpm@12.21.0"
 }

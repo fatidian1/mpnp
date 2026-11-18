@@ -41,4 +41,20 @@ describe('parseArgs', () => {
     expect(cmd.getPositionals()).toEqual(['build', '--mode', 'production', '-v']);
     expect(cmd.params.some((p) => p.kind === ParamKind.EndOfFlags)).toBe(true);
   });
+
+  it('parses flags with argument values like package, sbom-type, diff-unified', () => {
+    const cmdExec = parseArgs(['exec', '--package', 'cowsay', 'cowsay', 'hello']);
+    expect(cmdExec.getFlagValue('package')).toBe('cowsay');
+    expect(cmdExec.getPositionals()).toEqual(['cowsay', 'hello']);
+
+    const cmdShort = parseArgs(['exec', '-p', 'cowsay', 'cowsay']);
+    expect(cmdShort.getFlagValue('p')).toBe('cowsay');
+    expect(cmdShort.getPositionals()).toEqual(['cowsay']);
+
+    const cmdSbom = parseArgs(['sbom', '--sbom-type', 'cyclonedx']);
+    expect(cmdSbom.getFlagValue('sbom-type')).toBe('cyclonedx');
+
+    const cmdDiff = parseArgs(['diff', '--diff-unified', '5']);
+    expect(cmdDiff.getFlagValue('diff-unified')).toBe('5');
+  });
 });
