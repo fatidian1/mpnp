@@ -67,7 +67,7 @@
     "dep:check": "knip"
   },
   "dependencies": {
-    "@pnpm/napi": "12.21.0"
+    "@pnpm/napi": "12.23.0"
   },
   "devDependencies": {
     "@types/node": "^26.6.6",
