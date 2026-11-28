@@ -34,6 +34,13 @@ const FLAGS_WITH_ARGUMENT = new Set([
   'message',
   'm',
   'diff-unified',
+  'editor',
+  'otp',
+  'access',
+  'minimum-release-age',
+  'minimum-release-age-exclude',
+  'new-version',
+  'find-by',
 ]);
 
 export function parseArgs(rawTokens: readonly string[], pm: PackageManager = PackageManager.NPM): Command {

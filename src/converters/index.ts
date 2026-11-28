@@ -5,7 +5,6 @@ export { handlePack, isLocalPath } from './pack.js';
 export { handlePatch } from './patch.js';
 export { handleApproveBuilds } from './approve-builds.js';
 export { handleDiff } from './diff.js';
-export { handleEdit } from './edit.js';
 export { handleExec } from './exec.js';
 export { handleExplore } from './explore.js';
 export { handleInstallCiTest, handleInstallTest } from './composite.js';

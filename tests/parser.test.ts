@@ -56,5 +56,23 @@ describe('parseArgs', () => {
 
     const cmdDiff = parseArgs(['diff', '--diff-unified', '5']);
     expect(cmdDiff.getFlagValue('diff-unified')).toBe('5');
+
+    const cmdEdit = parseArgs(['edit', 'lodash', '--editor', 'nvim']);
+    expect(cmdEdit.getFlagValue('editor')).toBe('nvim');
+    expect(cmdEdit.getPositionals()).toEqual(['lodash']);
+
+    const cmdPublish = parseArgs(['publish', '--otp', '123456', '--access', 'public', '--new-version', '1.2.3']);
+    expect(cmdPublish.getFlagValue('otp')).toBe('123456');
+    expect(cmdPublish.getFlagValue('access')).toBe('public');
+    expect(cmdPublish.getFlagValue('new-version')).toBe('1.2.3');
+    expect(cmdPublish.getPositionals()).toEqual([]);
+
+    const cmdAge = parseArgs(['install', '--minimum-release-age', '1440', '--minimum-release-age-exclude', 'lodash']);
+    expect(cmdAge.getFlagValue('minimum-release-age')).toBe('1440');
+    expect(cmdAge.getFlagValue('minimum-release-age-exclude')).toBe('lodash');
+
+    const cmdFindBy = parseArgs(['why', 'react', '--find-by', 'myFinder']);
+    expect(cmdFindBy.getFlagValue('find-by')).toBe('myFinder');
+    expect(cmdFindBy.getPositionals()).toEqual(['react']);
   });
 });

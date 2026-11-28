@@ -60,20 +60,23 @@ describe('New Specs and Fixes (Review & Compatibility)', () => {
     });
   });
 
-  describe('npm edit -> pnpm patch', () => {
-    it('returns error when package is not provided', async () => {
-      const cmd = parseArgs(['edit']);
-      const result = await registry.convert(cmd);
-      expect(result.type).toBe('custom');
-      const exitCode = await executeResult(result, silentOpts);
-      expect(exitCode).toBe(1);
-    });
-
-    it('creates custom handler for package edit with pnpm patch', async () => {
+  describe('npm edit -> pnpm edit', () => {
+    it('translates npm edit <pkg> to native pnpm edit <pkg>', async () => {
       const cmd = parseArgs(['edit', 'lodash']);
       const result = await registry.convert(cmd);
-      expect(result.type).toBe('custom');
-      expect(result.description).toContain('Edit package lodash using pnpm patch');
+      expect(result.type).toBe('pnpm');
+      if (result.type === 'pnpm') {
+        expect(result.command.toString()).toBe('pnpm edit lodash');
+      }
+    });
+
+    it('preserves --editor flag with value in npm edit', async () => {
+      const cmd = parseArgs(['edit', '@scope/pkg/sub', '--editor', 'code --wait']);
+      const result = await registry.convert(cmd);
+      expect(result.type).toBe('pnpm');
+      if (result.type === 'pnpm') {
+        expect(result.command.toString()).toBe('pnpm edit @scope/pkg/sub --editor=code --wait');
+      }
     });
   });
 

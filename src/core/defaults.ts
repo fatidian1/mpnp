@@ -8,7 +8,6 @@ import { handlePack } from '../converters/pack.js';
 import { handlePatch } from '../converters/patch.js';
 import { handleApproveBuilds } from '../converters/approve-builds.js';
 import { handleDiff } from '../converters/diff.js';
-import { handleEdit } from '../converters/edit.js';
 import { handleExec } from '../converters/exec.js';
 import { handleExplore } from '../converters/explore.js';
 import { handleInstallCiTest, handleInstallTest } from '../converters/composite.js';
@@ -47,7 +46,7 @@ export function configureDefaultRegistry(registry: ConverterRegistry): Converter
     );
 
   // === 1:1 PASSTHROUGH & ALIAS COMMANDS ===
-  registry.passthrough('outdated', 'prune', 'pkg');
+  registry.passthrough('outdated', 'prune', 'pkg', 'edit');
   registry.command(['update', 'up', 'upgrade', 'u', 'udpate'], 'update');
   registry.command(['why', 'explain'], 'why');
   registry.command(['view', 'info', 'show', 'v'], 'view');
@@ -183,7 +182,6 @@ export function configureDefaultRegistry(registry: ConverterRegistry): Converter
 
   // === NEW SPECS & EXTENDED NPM COMMANDS ===
   registry.command(['diff']).handle(handleDiff);
-  registry.command(['edit']).handle(handleEdit);
   registry.command(['exec', 'x']).handle(handleExec);
   registry.command(['explore']).handle(handleExplore);
   registry.command(['install-ci-test', 'cit', 'clean-install-test', 'sit']).handle(handleInstallCiTest);
